@@ -1,12 +1,42 @@
 import React from "react";
-import { IProduct } from "../interfaces";
+import { IPDeleteResponse, IProduct } from "../interfaces";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { serverApi } from "../App";
 
 interface IProductProps {
 	product: IProduct;
 }
 
 const Product: React.FC<IProductProps> = ({ product }) => {
-	const { title, productImage, productId, price } = product;
+	const queryClient = useQueryClient();
+
+	const { _id, title, productImage, productId, price } = product;
+
+	const deleteProduct = useMutation({
+		mutationFn: async (id: string) => {
+			try {
+				await toast.promise(
+					axios.delete<IPDeleteResponse>(`${serverApi}/${id}`),
+					{
+						loading: "Deleting Product...",
+						success: (result) => result.data?.message,
+						error: (error) =>
+							error.message || "Error Deleting Product!",
+					}
+				);
+			} catch (err) {
+				if (err instanceof Error) {
+					toast.error(err.message || "Unknown Error!");
+				}
+				toast.error("Unknown Error!");
+			}
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["productsData"] });
+		},
+	});
 
 	return (
 		<section className="flex flex-col items-center justify-center gap-1 border px-3 py-2">
@@ -25,16 +55,10 @@ const Product: React.FC<IProductProps> = ({ product }) => {
 					</span>
 				</figure>
 			</div>
-			<div className="w-full flex items-center flex-wrap justify-around gap-3 mt-2">
-				<button
-					className="border border-teal-800 text-teal-800 hover:bg-teal-800 hover:text-white transition-all duration-500 font-semibold px-3 py-1"
-					// onClick={() => setOpen(true)}
-				>
-					Update
-				</button>
+			<div className="w-full flex items-center flex-wrap justify-center gap-3 mt-2">
 				<button
 					className="border border-red-800 text-red-800 hover:bg-red-800 hover:text-white transition-all duration-500 font-semibold px-3 py-1"
-					// onClick={() => handleDeleteProduct(_id)}
+					onClick={() => deleteProduct.mutateAsync(_id)}
 				>
 					Delete
 				</button>

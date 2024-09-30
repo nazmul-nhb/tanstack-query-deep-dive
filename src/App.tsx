@@ -4,13 +4,14 @@ import { IPQueryResponse } from "./interfaces";
 import Product from "./components/Product";
 import CreateProduct from "./components/CreateProduct";
 
+export const serverApi =
+	"https://rtk-product-management-server.vercel.app/products";
+
 const App = () => {
 	const { data: productsData = {}, isLoading } = useQuery({
-		queryKey: ["products"],
+		queryKey: ["productsData"],
 		queryFn: async () => {
-			const { data } = await axios.get<IPQueryResponse>(
-				"https://rtk-product-management-server.vercel.app/products"
-			);
+			const { data } = await axios.get<IPQueryResponse>(serverApi);
 			return data;
 		},
 	});
@@ -36,7 +37,7 @@ const App = () => {
 				))}
 			</main>
 
-			<div className="fixed top-4 left-1 text-red-800 font-bold border border-red-700 p-1 rounded-full">
+			<div className="fixed top-4 left-1 aspect-square text-red-800 font-bold border border-red-700 p-1 rounded-full">
 				{totalProducts}
 			</div>
 		</>
