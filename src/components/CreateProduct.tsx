@@ -37,7 +37,10 @@ const CreateProduct: React.FC = () => {
 			}
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["productsData"] });
+			queryClient.invalidateQueries({
+				queryKey: ["productsData"],
+				exact: true,
+			});
 		},
 	});
 
