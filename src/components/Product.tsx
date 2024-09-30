@@ -38,6 +38,14 @@ const Product: React.FC<IProductProps> = ({ product }) => {
 		},
 	});
 
+	// const handleDeleteProduct = async (id: string) => {
+	// 	try {
+	// 		await deleteProductMutation.mutateAsync(id);
+	// 	} catch (err) {
+	// 		console.error("Error Deleting Product:", err);
+	// 	}
+	// };
+
 	return (
 		<section className="flex flex-col items-center justify-center gap-1 border px-3 py-2">
 			<div title={title} className="space-y-2">

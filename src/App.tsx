@@ -14,6 +14,8 @@ const App = () => {
 			const { data } = await axios.get<IPQueryResponse>(serverApi);
 			return data;
 		},
+		// staleTime: 15000,
+		// refetchInterval: 3000,
 	});
 
 	if (isLoading) {

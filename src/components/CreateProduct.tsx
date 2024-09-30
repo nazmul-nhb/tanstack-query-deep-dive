@@ -1,29 +1,53 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Button, Form, Input } from "antd";
-import { IProductToCreate, TProductField } from "../interfaces";
+import {
+	IPCreationResponse,
+	IProductToCreate,
+	TProductField,
+} from "../interfaces";
+import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { serverApi } from "../App";
 
 const CreateProduct: React.FC = () => {
 	const [showForm, setShowForm] = useState<boolean>(false);
 	const [form] = Form.useForm();
+	const queryClient = useQueryClient();
 
-	const handleCreateProduct = async (product: IProductToCreate) => {
-		console.log(product);
-		try {
-			// await toast.promise(CreateProduct(product).unwrap(), {
-			// 	loading: "Saving Product...",
-			// 	success: (result) => result.message,
-			// 	error: (error) => error.message || "Error Saving Product!",
-			// });
-		} catch (err) {
-			if (err instanceof Error) {
-				toast.error(err.message || "Unknown Error!");
+	const createProduct = useMutation({
+		mutationFn: async (product: IProductToCreate) => {
+			try {
+				await toast.promise(
+					axios.post<IPCreationResponse>(serverApi, product),
+					{
+						loading: "Saving Product...",
+						success: (result) => result.data?.message,
+						error: (error) =>
+							error.message || "Error Saving Product!",
+					}
+				);
+			} catch (err) {
+				if (err instanceof Error) {
+					toast.error(err.message || "Unknown Error!");
+				}
+				toast.error("Unknown Error!");
+			} finally {
+				form.resetFields();
 			}
-			toast.error("Unknown Error!");
-		} finally {
-			form.resetFields();
-		}
-	};
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["productsData"] });
+		},
+	});
+
+	// const handleCreateProduct = async (product: IProductToCreate) => {
+	// 	try {
+	// 		await createProduct.mutateAsync(product);
+	// 	} catch (err) {
+	// 		console.error("Error Creation Product:", err);
+	// 	}
+	// };
 
 	return (
 		<section
@@ -48,7 +72,9 @@ const CreateProduct: React.FC = () => {
 					form={form}
 					name="product"
 					style={{ width: "100%", maxWidth: 600 }}
-					onFinish={handleCreateProduct}
+					onFinish={(product: IProductToCreate) =>
+						createProduct.mutateAsync(product)
+					}
 					autoComplete="on"
 				>
 					<Form.Item<TProductField>
